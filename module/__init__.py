@@ -1,3 +1,4 @@
+import random
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon as pol
@@ -9,4 +10,5 @@ def imports():
     return SimpleNamespace(np=np,
                            Callable=Callable,
                            plt=plt,
-                           pol=pol)
+                           pol=pol,
+                           random=random)

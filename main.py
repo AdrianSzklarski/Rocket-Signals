@@ -17,7 +17,8 @@
 from module import imports
 from module.Math_Laplace import Laplace_function as Lf
 from module.Windows import windows as Win, update_subplot
-from module.Markers import make_missile, make_radar
+from module.Markers import make_missile, make_radar, make_radar_sweep
+from module.Target import random_target_spawn
 import matplotlib.pyplot as plt
 
 np = imports().np
@@ -52,42 +53,81 @@ if __name__ == "__main__":
         # Create and draw the interceptor missile (blue)
         # Parameters: axis, initial X position, initial Y position, rotation angle,
         # edge color, and label text
+
+        # --- INTERCEPTOR (PAC-3) placed at radar coordinates (0,0) ---
+        rocket_x, rocket_y = 8, 0
+        rocket_angle = 90  # Rakieta startuje pionowo do góry (można zmienić)
+
         interceptor, interceptor_text = make_missile(
             axes[0],
-            180, 6,
-            angle_deg=90,
+            rocket_x,
+            rocket_y,
+            angle_deg=rocket_angle,
             color="blue",
             label="Rocket"
         )
 
         # Create and draw the target missile (red)
         # Same parameters as above but with different position and rotation
+
+        tgt_x, tgt_y = random_target_spawn()
+
+        # kierunek rakiety przeciwnika (później można to zmieniać dynamicznie)
+        target_angle = 90
+
         target, target_text = make_missile(
             axes[0],
-            182, 6,
-            angle_deg=-90,
+            tgt_x,
+            tgt_y,
+            angle_deg=target_angle,
             color="red",
             label="Target"
         )
 
         # --- ADD RADAR AT (0,0) ---
-        make_radar(axes[0], 0, 0, color="black", label="Radar")
+        make_radar(axes[0], 0, 0)
+
+        # --- ADD RADAR AT (0,0) ---
+        make_radar(axes[0], 0, 0)
+
+        # Create sweep line (required for animation)
+        sweep = make_radar_sweep(axes[0], 0, 0)
+        current_angle = 0
 
         # --- Update the third subplot (first in second row) ---
         update_subplot(
-            ax=axes[2],  # wybrany subplot
-            x_data=s_values,  # dane na oś X
-            y_data=np.abs(F_s),  # dane na oś Y
-            label="|F(s)|",  # legenda
+            ax=axes[2],
+            x_data=s_values,
+            y_data=np.abs(F_s),
+            label="|F(s)|",
             title="Laplace Transform of Target Position",
             xlabel="s",
             ylabel="|F(s)|",
-            clear=False  # czyścimy stary wykres
+            clear=False
         )
 
         # --- Save and show ---
         fig.savefig("laplace_test.png")
         print("Plot saved as laplace_test.png")
+
+        fig.savefig("laplace_test.png")
+        print("Plot saved as laplace_test.png")
+
+        # --- Minimal radar sweep animation ---
+        from matplotlib.animation import FuncAnimation
+        from module.Markers import update_radar_sweep
+
+
+        def animate(frame):
+            global current_angle
+            current_angle = (current_angle + 2) % 360
+            update_radar_sweep(sweep, 0, 0, current_angle)
+            return []
+
+
+        ani = FuncAnimation(fig, animate, interval=30)
+
+        plt.show()
 
         plt.show()
 
